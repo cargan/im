@@ -72,10 +72,19 @@ class MachineLocation extends Location
             }
         }
     }
+
+    public function _ggetPath($edge) {
+        return parent::_getPath($edge);
+    }
 }
 
 class MachineLocationManager {
     private $__MachineLocations;
+    private $__Base;
+
+    public function __construct($Base) {
+        $this->__Base = $Base;
+    }
 
     public function register(MachineLocation $MachineLocation) {
         $this->__MachineLocations[] = $MachineLocation;
@@ -85,6 +94,22 @@ class MachineLocationManager {
         foreach ($this->__MachineLocations as $ML) {
             $ML->move($location);
         }
+    }
+
+    public function returnToBase() {
+        return $this->move($this->getBaseLocation());
+    }
+
+    public function moveMTo($location) {
+
+        foreach ($this->__MachineLocations as $ML) {
+            print_r($ML->_ggetPath($location ));
+        }
+        // $this->getClosest($location);
+    }
+
+    private function getBaseLocation() {
+        return $this->__Base;
     }
 }
 
@@ -97,13 +122,15 @@ $Machine1 = new Machine();
 $Machine2 = new Machine();
 $Machine3 = new Machine();
 
+$Location = 'a';
+$Base = 'b';
 
+$MachineLocationManager = new MachineLocationManager($Base);
 
-$MachineLocation1 = new MachineLocation($Machine1, 'a');
-$MachineLocation2 = new MachineLocation($Machine2, 'a');
-$MachineLocation3 = new MachineLocation($Machine3, 'a');
+$MachineLocation1 = new MachineLocation ($Machine1, $Location);
+$MachineLocation2 = new MachineLocation ($Machine2, $Location);
+$MachineLocation3 = new MachineLocation ($Machine3, $Location);
 
-$MachineLocationManager = new MachineLocationManager();
 $MachineLocationManager->register($MachineLocation1);
 $MachineLocationManager->register($MachineLocation2);
 $MachineLocationManager->register($MachineLocation3);
@@ -118,6 +145,16 @@ $MachineLocationManager->move('i');
 //
 // $path = $g->getPath($MachineLocation3->getLocation(), 'i');
 // $MachineLocation3->move($path);
+
+print_r(array(
+    $MachineLocation1->getLocation(),
+    $MachineLocation2->getLocation(),
+    $MachineLocation3->getLocation()
+));
+
+$MachineLocationManager->returnToBase();
+
+$MachineLocationManager->moveMTo(2, 'g');
 
 print_r(array(
     $MachineLocation1->getLocation(),
