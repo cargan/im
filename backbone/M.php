@@ -9,23 +9,6 @@ function generateId($start, $end) {
 
 $Path = new Path($g);
 
-class Machine
-{
-    private $__id;
-
-    public function __construct() {
-        $this->__id = generateId(15, 20);
-    }
-    public function getId() {
-        return $this->__id;
-    }
-
-    public function move($edge) {
-        //do something
-        return true;
-    }
-}
-
 //Movement
 class Location extends Path
 {
@@ -49,60 +32,94 @@ class Location extends Path
 }
 
 
-class MachineLocation extends Location
+class Machine
+    extends Location
 {
     private $__id;
-    private $__Machine;
 
-    public function __construct (Machine $Machine, $Location) {
-        $this->__Machine = $Machine;
-        $this->__id = generateId(7, 11);
+    public function __construct($Location) {
         parent::__construct($Location);
+        $this->__id = generateId(15, 20);
     }
-
     public function getId() {
         return $this->__id;
+    }
+
+    public function move($edge) {
+        $path = $this->_getPath($edge);
+        foreach ($path as $p) {
+            if (!$this->__move($edge)) {
+                throw new Exception ('Could not move');
+            }
+        }
+    }
+
+    private function __move($edge) {
+        $this->_setLocation($edge);
+        //make phisical move
+        return true;
     }
 
     public function getLocation() {
         return $this->_getLocation();
     }
 
-    public function move($edge) {
-        $path = $this->_getPath($edge);
-        foreach ($path as $p) {
-            if ($this->__Machine->move($edge)) {
-                $this->_setLocation($edge);
-            } else {
-                throw new Exception ('Could not move');
-            }
-        }
-    }
+     public function getLPath($edge) {
+         return parent::_getPath($edge);
+     }
 
-    public function _ggetPath($edge) {
-        return parent::_getPath($edge);
-    }
-
-    public function __toString() {
-        return 'ML for ' . $this->__Machine->getId();
-    }
 }
 
-class MachineLocationManager {
-    private $__MachineLocations;
+// class MachineLocation extends Location
+// {
+//     private $__id;
+//     private $__Machine;
+//
+//     public function __construct (Machine $Machine, $Location) {
+//         $this->__Machine = $Machine;
+//         $this->__id = generateId(7, 11);
+//         parent::__construct($Location);
+//     }
+//
+//     public function getId() {
+//         return $this->__id;
+//     }
+//
+//     public function getLocation() {
+//         return $this->_getLocation();
+//     }
+//
+//     public function move($edge) {
+//         $path = $this->_getPath($edge);
+//         foreach ($path as $p) {
+//             if ($this->__Machine->move($edge)) {
+//                 $this->_setLocation($edge);
+//             } else {
+//                 throw new Exception ('Could not move');
+//             }
+//         }
+//     }
+//
+//     public function getLPath($edge) {
+//         return parent::_getPath($edge);
+//     }
+// }
+//
+class MachineManager {
+    private $__Machines;
     private $__Base;
 
     public function __construct($Base) {
         $this->__Base = $Base;
-        $this->__MachineLocations = new SplObjectStorage();
+        $this->__Machines = new SplObjectStorage();
     }
 
-    public function register(MachineLocation $MachineLocation) {
-        $this->__MachineLocations->attach($MachineLocation);
+    public function register(Machine $Machine) {
+        $this->__Machines->attach($Machine);
     }
 
     public function move($location) {
-        foreach ($this->__MachineLocations as $ML) {
+        foreach ($this->__Machines as $ML) {
             $ML->move($location);
         }
     }
@@ -116,8 +133,8 @@ class MachineLocationManager {
             throw new Exception ('move to data provided incorectly');
         }
         $paths = [];
-        foreach ($this->__MachineLocations as $key=>$ML) {
-            $paths[$ML->getId()] = $ML->_ggetPath($location );
+        foreach ($this->__Machines as $key=>$ML) {
+            $paths[$ML->getId()] = $ML->getLPath($location );
         }
         $pc = [];
         foreach ($paths as $k=>$p) {
@@ -125,7 +142,7 @@ class MachineLocationManager {
         }
         arsort($pc);
         $items = array_slice($pc, 0, $number, true);
-        foreach ($this->__MachineLocations as $ML) {
+        foreach ($this->__Machines as $ML) {
             if (isset($items[$ML->getId()])) {
                 $ML->move($location);
             }
@@ -140,64 +157,49 @@ class MachineLocationManager {
 
 //there are more algorythoms; this is indirect appproach a->b != b->a
 
-$Machine1 = new Machine();
-$Machine2 = new Machine();
-$Machine3 = new Machine();
-
 $Location = 'a';
+
+$Machine1 = new Machine($Location);
+$Machine2 = new Machine($Location);
+$Machine3 = new Machine($Location);
+
 $Base = 'b';
 
-$MachineLocationManager = new MachineLocationManager($Base);
+$MachineManager = new MachineManager($Base);
 
-$MachineLocation1 = new MachineLocation ($Machine1, $Location);
-$MachineLocation2 = new MachineLocation ($Machine2, $Location);
-$MachineLocation3 = new MachineLocation ($Machine3, $Location);
+$MachineManager->register($Machine1);
+$MachineManager->register($Machine2);
+$MachineManager->register($Machine3);
 
-$MachineLocationManager->register($MachineLocation1);
-$MachineLocationManager->register($MachineLocation2);
-$MachineLocationManager->register($MachineLocation3);
-
-$MachineLocationManager->move('i');
-
-// print_r(array(
-//     $MachineLocation1->getLocation(),
-//     $MachineLocation2->getLocation(),
-//     $MachineLocation3->getLocation()
-// ));
-//
-// $MachineLocationManager->returnToBase();
-//
-// // $MachineLocationManager->moveMTo(2, 'g');
-//
-// print_r(array(
-//     $MachineLocation1->getLocation(),
-//     $MachineLocation2->getLocation(),
-//     $MachineLocation3->getLocation()
-// ));
-
-$MachineLocationManager->move('b');
+$MachineManager->move('i');
 
 print_r(array(
-    $MachineLocation1->getLocation(),
-    $MachineLocation2->getLocation(),
-    $MachineLocation3->getLocation()
+    $Machine1->getLocation(),
+    $Machine2->getLocation(),
+    $Machine3->getLocation()
 ));
 
 
 
-$MachineLocationManager->moveMTo(2, 'g');
+$MachineManager->moveMTo(2, 'g');
 print_r(array(
-    $MachineLocation1->getLocation(),
-    $MachineLocation2->getLocation(),
-    $MachineLocation3->getLocation()
+    $Machine1->getLocation(),
+    $Machine2->getLocation(),
+    $Machine3->getLocation()
 ));
 
-$MachineLocationManager->moveMTo(1, 'a');
+$MachineManager->moveMTo(1, 'a');
 
 print_r(array(
-    $MachineLocation1->getLocation(),
-    $MachineLocation2->getLocation(),
-    $MachineLocation3->getLocation()
+    $Machine1->getLocation(),
+    $Machine2->getLocation(),
+    $Machine3->getLocation()
 ));
 
+$MachineManager->returnToBase();;
 
+print_r(array(
+    $Machine1->getLocation(),
+    $Machine2->getLocation(),
+    $Machine3->getLocation()
+));
