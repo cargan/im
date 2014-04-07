@@ -1,6 +1,12 @@
 <?php
 require("../vendors/dijkstra/Dijkstra.php");
 
+function generateId($start, $end) {
+    $length = rand(70, 100);
+    return bin2hex(openssl_random_pseudo_bytes($length));
+}
+
+
 $Path = new Path($g);
 
 class Machine
@@ -8,14 +14,8 @@ class Machine
     private $__id;
 
     public function __construct() {
-        $this->__id = $this->generateId();
+        $this->__id = generateId(15, 20);
     }
-
-    private function generateId() {
-        $length = rand(70, 100);
-        return bin2hex(openssl_random_pseudo_bytes($length));
-    }
-
     public function getId() {
         return $this->__id;
     }
@@ -44,18 +44,24 @@ class Location extends Path
     }
 
     protected function _getPath($to) {
-       return $this->getPath('a', 'i');
+       return $this->getPath($this->_getLocation(), $to);
     }
 }
 
 
 class MachineLocation extends Location
 {
+    private $__id;
     private $__Machine;
 
     public function __construct (Machine $Machine, $Location) {
         $this->__Machine = $Machine;
+        $this->__id = generateId(7, 11);
         parent::__construct($Location);
+    }
+
+    public function getId() {
+        return $this->__id;
     }
 
     public function getLocation() {
@@ -76,6 +82,10 @@ class MachineLocation extends Location
     public function _ggetPath($edge) {
         return parent::_getPath($edge);
     }
+
+    public function __toString() {
+        return 'ML for ' . $this->__Machine->getId();
+    }
 }
 
 class MachineLocationManager {
@@ -84,10 +94,11 @@ class MachineLocationManager {
 
     public function __construct($Base) {
         $this->__Base = $Base;
+        $this->__MachineLocations = new SplObjectStorage();
     }
 
     public function register(MachineLocation $MachineLocation) {
-        $this->__MachineLocations[] = $MachineLocation;
+        $this->__MachineLocations->attach($MachineLocation);
     }
 
     public function move($location) {
@@ -100,12 +111,25 @@ class MachineLocationManager {
         return $this->move($this->getBaseLocation());
     }
 
-    public function moveMTo($location) {
-
-        foreach ($this->__MachineLocations as $ML) {
-            print_r($ML->_ggetPath($location ));
+    public function moveMTo($number, $location) {
+        if (!$number || !$location) {
+            throw new Exception ('move to data provided incorectly');
         }
-        // $this->getClosest($location);
+        $paths = [];
+        foreach ($this->__MachineLocations as $key=>$ML) {
+            $paths[$ML->getId()] = $ML->_ggetPath($location );
+        }
+        $pc = [];
+        foreach ($paths as $k=>$p) {
+            $pc[$k] = count($p);
+        }
+        arsort($pc);
+        $items = array_slice($pc, 0, $number, true);
+        foreach ($this->__MachineLocations as $ML) {
+            if (isset($items[$ML->getId()])) {
+                $ML->move($location);
+            }
+        }
     }
 
     private function getBaseLocation() {
@@ -115,9 +139,7 @@ class MachineLocationManager {
 
 
 //there are more algorythoms; this is indirect appproach a->b != b->a
-// $result = $Path->getPath('a', 'i');
-// print_r($result );
-$machines = [];
+
 $Machine1 = new Machine();
 $Machine2 = new Machine();
 $Machine3 = new Machine();
@@ -137,14 +159,23 @@ $MachineLocationManager->register($MachineLocation3);
 
 $MachineLocationManager->move('i');
 
-// $path = $g->getPath($MachineLocation1->getLocation(), 'g');
-// $MachineLocation1->move($path);
+// print_r(array(
+//     $MachineLocation1->getLocation(),
+//     $MachineLocation2->getLocation(),
+//     $MachineLocation3->getLocation()
+// ));
 //
-// $path = $g->getPath($MachineLocation2->getLocation(), 'f');
-// $MachineLocation2->move($path);
+// $MachineLocationManager->returnToBase();
 //
-// $path = $g->getPath($MachineLocation3->getLocation(), 'i');
-// $MachineLocation3->move($path);
+// // $MachineLocationManager->moveMTo(2, 'g');
+//
+// print_r(array(
+//     $MachineLocation1->getLocation(),
+//     $MachineLocation2->getLocation(),
+//     $MachineLocation3->getLocation()
+// ));
+
+$MachineLocationManager->move('b');
 
 print_r(array(
     $MachineLocation1->getLocation(),
@@ -152,9 +183,16 @@ print_r(array(
     $MachineLocation3->getLocation()
 ));
 
-$MachineLocationManager->returnToBase();
+
 
 $MachineLocationManager->moveMTo(2, 'g');
+print_r(array(
+    $MachineLocation1->getLocation(),
+    $MachineLocation2->getLocation(),
+    $MachineLocation3->getLocation()
+));
+
+$MachineLocationManager->moveMTo(1, 'a');
 
 print_r(array(
     $MachineLocation1->getLocation(),
@@ -163,34 +201,3 @@ print_r(array(
 ));
 
 
-// $MachineGrid1 = new MachineGrid($Machine1, 4, 6);
-// $MachineGrid2 = new MachineGrid($Machine2, 5, 6);
-//
-// $MCommandHub = new MCommandHub();
-// $MCommandHubId = $MCommandHub->register(
-//     $Machine1->getId(),
-//     $MachineGrid1->getCoordiantes()
-// );
-// $Machine1->setCommandHubId($MCommandHubId);
-// $MCommandHubId = $MCommandHub->register(
-//     $Machine2->getId(),
-//     $MachineGrid2->getCoordiantes()
-// );
-// $Machine2->setCommandHubId($MCommandHubId);
-//
-// print_r(array($MCommandHub, $Machine1, $Machine2));
-// print_r(array($Machine1->getId()));
-
-// for($i=0;$i<3;$i++) {
-//     $machines[] = new Machine();
-// }
-
-// print_r( array($Machine, $MachineGrid ));
-// for($i=0;$i<3;$i++) {
-//     $MachineGrid->move('up');
-//     print_r( $MachineGrid->getPosition() );
-// }
-// for($i=0;$i<3;$i++) {
-//     $MachineGrid->move('left');
-//     print_r( $MachineGrid->getPosition() );
-// }
