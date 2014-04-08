@@ -9,6 +9,13 @@ trait Utils
     }
 }
 
+class Radar extends Path
+{
+    public function getDataByNode($node)
+    {
+    }
+}
+
 //Movement
 class Location extends Path
 {
@@ -88,6 +95,11 @@ class Machine extends Location
         throw new Exception('option not found: '.$name);
     }
 
+    public function getDistance($node)
+    {
+        return $this->_getDistance($node, $this->getLocation());
+    }
+
 }
 
 class Kali extends Machine
@@ -161,6 +173,35 @@ class Eli extends Machine
     {
     }
 
+}
+
+class EnemySoldier extends Machine
+{
+    private $__id;
+
+    private $__opts = [
+        'speed'      => 2,
+        'experience' => 1,
+        'shield'     => 2,
+        'health'     => 10,
+        'damage'     => 3,
+        'attackRange'=> 10,
+    ];
+
+    public function __construct($Location)
+    {
+        parent::__construct($Location);
+        $this->__id = $this->generateId();
+    }
+
+    public function getId()
+    {
+        return $this->__id;
+    }
+
+    public function shoot()
+    {
+    }
 }
 
 

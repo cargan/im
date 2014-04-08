@@ -53,6 +53,9 @@ $MachineManager = new MachineManager($Base);
 
 $Kali = new Kali($Machine1, $Machine2, $Machine3, $Location);
 $Eli = new Eli($Machine4, $Machine5, $Location2);
+
+$EnemySoldier = new EnemySoldier('h');
+
 $MachineManager->register($Kali);
 $MachineManager->register($Eli);
 
@@ -74,5 +77,5 @@ print_r([
     $Eli->getLocation()
 ]);
 
-
+var_dump($Kali->getDistance('i'));
 
