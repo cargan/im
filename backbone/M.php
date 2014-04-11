@@ -9,11 +9,19 @@ trait Utils
     }
 }
 
+
 class Radar extends Path
 {
-    public function getDataByNode($node)
+    public function getObjects($location)
     {
+        return $this->_getItems($location);
     }
+
+    public function getTerrainObjects()
+    {
+        return $this->_getAllItems();
+    }
+
 }
 
 //Movement
@@ -23,6 +31,7 @@ class Location extends Path
 
     public function __construct($location) {
         $this->__location = $location;
+        $this->_addItem($location);
     }
 
     protected function _getLocation() {
@@ -43,6 +52,7 @@ class Machine extends Location
 {
     use Utils;
     private $__id;
+    protected $observers = [];
     private $__opts = [
         'speed'      => 5,
         'experience' => 1,
@@ -71,6 +81,10 @@ class Machine extends Location
     }
 
     private function __move($edge) {
+        $this->_moveItem(
+            $this->getLocation(),
+            $edge
+        );
         $this->_setLocation($edge);
         //make physical move
         return true;
@@ -119,6 +133,7 @@ class Kali extends Machine
     public function __construct(Machine $M1, Machine $M2, Machine $M3, $Location)
     {
         parent::__construct($Location);
+        $this->__Machines = new SplObjectStorage();
 
         $this->__Machines = new SplObjectStorage();
         $this->__Machines->attach($M1);
@@ -178,7 +193,6 @@ class Eli extends Machine
 class EnemySoldier extends Machine
 {
     private $__id;
-
     private $__opts = [
         'speed'      => 2,
         'experience' => 1,
