@@ -3,7 +3,8 @@ require("../vendors/dijkstra/Dijkstra.php");
 
 trait Utils
 {
-    protected function generateId($start=5, $end=11) {
+    protected function generateId($start=5, $end=11)
+    {
         $length = rand($start, $end);
         return bin2hex(openssl_random_pseudo_bytes($length));
     }
@@ -29,9 +30,9 @@ class Location extends Path
 {
     private $__location;
 
-    public function __construct($location) {
+    public function __construct($location, $item) {
         $this->__location = $location;
-        $this->_addItem($location);
+        $this->_addItem($location, $item);
     }
 
     protected function _getLocation() {
@@ -63,12 +64,17 @@ class Machine extends Location
 
 
     public function __construct($Location) {
-        parent::__construct($Location);
+        parent::__construct($Location, $this->getIdentification());
         $this->__id = $this->generateId();
     }
 
     public function getId() {
         return $this->__id;
+    }
+
+    public function getIdentification()
+    {
+        return __CLASS__;
     }
 
     public function move($edge) {
@@ -83,7 +89,8 @@ class Machine extends Location
     private function __move($edge) {
         $this->_moveItem(
             $this->getLocation(),
-            $edge
+            $edge,
+            $this->getIdentification()
         );
         $this->_setLocation($edge);
         //make physical move
@@ -132,16 +139,30 @@ class Kali extends Machine
 
     public function __construct(Machine $M1, Machine $M2, Machine $M3, $Location)
     {
+        if ($M1->getLocation() !== $Location ||
+            $M2->getLocation() !== $Location ||
+            $M3->getLocation() !== $Location) {
+            throw new Exception ('build of machine should be performed in one place');
+        }
         parent::__construct($Location);
         $this->__Machines = new SplObjectStorage();
 
-        $this->__Machines = new SplObjectStorage();
         $this->__Machines->attach($M1);
         $this->__Machines->attach($M2);
         $this->__Machines->attach($M3);
 
-    // @TODO some combination and transformation
+        $this->_removeTerrainItems(
+            $Location,
+            $M1->getIdentification(),
+            3
+        );
+
         $this->__id = $this->generateId();
+    }
+
+    public function getIdentification()
+    {
+        return __CLASS__;
     }
 
     public function getId()
@@ -179,6 +200,12 @@ class Eli extends Machine
         $this->__id = $this->generateId();
     }
 
+    public function getIdentification()
+    {
+        return __CLASS__;
+    }
+
+
     public function getId()
     {
         return $this->__id;
@@ -204,8 +231,13 @@ class EnemySoldier extends Machine
 
     public function __construct($Location)
     {
-        parent::__construct($Location);
+        parent::__construct($Location, $this->getIdentification());
         $this->__id = $this->generateId();
+    }
+
+    public function getIdentification()
+    {
+        return __CLASS__;
     }
 
     public function getId()
