@@ -23,6 +23,10 @@ class Radar extends Path
         return $this->_getAllItems();
     }
 
+    public function sightSeeNearestObjects($location, $sightseeing) //how many weight can see
+    {
+        //TODO
+    }
 }
 
 //Movement
@@ -53,7 +57,6 @@ class Machine extends Location
 {
     use Utils;
     private $__id;
-    protected $observers = [];
     private $__opts = [
         'speed'      => 5,
         'experience' => 1,
@@ -265,6 +268,11 @@ class MachineManager
     public function register(Machine $Machine)
     {
         $this->__Machines->attach($Machine);
+    }
+
+    public function deRegister(Machine $Machine)
+    {
+        $this->__Machines->detach($Machine);
     }
 
     public function move($location)
