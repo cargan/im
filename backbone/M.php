@@ -126,10 +126,46 @@ class Machine extends Location
 
 }
 
-class Kali extends Machine
+class MultiM extends Machine
 {
-    private $__Machines; //3 machines
+    private $__Machines;
     private $__id;
+
+    public function __construct($Location, $Machines)
+    {
+        foreach ($Machines as $Machine) {
+            if ($Machine->getLocation() !== $Location) {
+                throw new Exception (
+                    'build of machine should be performed in one place'
+                );
+            }
+        }
+        parent::__construct($Location);
+        $this->__Machines = new SplObjectStorage();
+
+        foreach ($Machines as $Machine) {
+            $this->__Machines->attach($Machine);
+
+            $this->_removeTerrainItems(
+                $Location,
+                $Machine->getIdentification(),
+                1
+            );
+        }
+
+        $this->__id = $this->generateId();
+    }
+
+    public function getId()
+    {
+        return $this->__id;
+    }
+
+}
+
+class Kali extends MultiM
+{
+    const NUMBER_OF_MACHINES = 3;
     //1 to 10
     private $__opts = [
         'speed'      => 3,
@@ -140,27 +176,18 @@ class Kali extends Machine
         'attackRange'=> 80,
     ];
 
-    public function __construct(Machine $M1, Machine $M2, Machine $M3, $Location)
+    public function __construct ($Location, $Machines)
     {
-        if ($M1->getLocation() !== $Location ||
-            $M2->getLocation() !== $Location ||
-            $M3->getLocation() !== $Location) {
-            throw new Exception ('build of machine should be performed in one place');
+        if (count($Machines) !== self::NUMBER_OF_MACHINES) {
+            throw new Exception('number of machines needed do not match');
         }
-        parent::__construct($Location);
-        $this->__Machines = new SplObjectStorage();
+        foreach ($Machines as $M) {
+            if (!is_a($M, 'Machine')) {
+                throw new Exception('not an instance of Machine');
+            }
+        }
 
-        $this->__Machines->attach($M1);
-        $this->__Machines->attach($M2);
-        $this->__Machines->attach($M3);
-
-        $this->_removeTerrainItems(
-            $Location,
-            $M1->getIdentification(),
-            3
-        );
-
-        $this->__id = $this->generateId();
+        parent::__construct($Location, $Machines);
     }
 
     public function getIdentification()
@@ -168,21 +195,15 @@ class Kali extends Machine
         return __CLASS__;
     }
 
-    public function getId()
-    {
-        return $this->__id;
-    }
-
     public function shoot()
     {
     }
 }
 
-class Eli extends Machine
-{
-    private $__Machines; //2 machines
-    private $__id;
 
+class Eli extends MultiM
+{
+    const NUMBER_OF_MACHINES = 2;
     private $__opts = [
         'speed'      => 2,
         'experience' => 1,
@@ -192,26 +213,22 @@ class Eli extends Machine
         'attackRange'=> 50,
     ];
 
-    public function __construct(Machine $M1, Machine $M2, $Location)
+    public function __construct ($Location, $Machines)
     {
-        parent::__construct($Location);
-
-        $this->__Machines = new SplObjectStorage();
-        $this->__Machines->attach($M1);
-        $this->__Machines->attach($M2);
-
-        $this->__id = $this->generateId();
+        if (count($Machines) !== self::NUMBER_OF_MACHINES) {
+            throw new Exception('number of machines needed do not match');
+        }
+        foreach ($Machines as $M) {
+            if (!is_a($M, 'Machine')) {
+                throw new Exception('not an instance of Machine');
+            }
+        }
+        parent::__construct($Location, $Machines);
     }
 
     public function getIdentification()
     {
         return __CLASS__;
-    }
-
-
-    public function getId()
-    {
-        return $this->__id;
     }
 
     public function shoot()

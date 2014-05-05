@@ -1,6 +1,7 @@
 <?php
 
-class HeadquartersLocation extends Location {
+class HeadquartersLocation extends Location
+{
     private $__location = 'e';
 
     public function __construct() {
@@ -8,7 +9,8 @@ class HeadquartersLocation extends Location {
     }
 }
 
-class Location {
+class Location
+{
     private $__location;
 
     public function __construct ($location) {
