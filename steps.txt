@@ -1,4 +1,0 @@
-1. make n objects; DONE
-2. make them move; DONE
-3. make some protocol to talk each other; [stand allone; controlled by single point]
-4. each can give commands to other (who is the boss?)

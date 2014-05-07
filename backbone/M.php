@@ -10,7 +10,6 @@ trait Utils
     }
 }
 
-
 class Radar extends Path
 {
     public function getObjects($location)
@@ -176,6 +175,11 @@ class Kali extends MultiM
         'attackRange'=> 80,
     ];
 
+    static public function numberOfMachines()
+    {
+        return self::NUMBER_OF_MACHINES;
+    }
+
     public function __construct ($Location, $Machines)
     {
         if (count($Machines) !== self::NUMBER_OF_MACHINES) {
@@ -213,6 +217,11 @@ class Eli extends MultiM
         'attackRange'=> 50,
     ];
 
+    static public function numberOfMachines()
+    {
+        return self::NUMBER_OF_MACHINES;
+    }
+
     public function __construct ($Location, $Machines)
     {
         if (count($Machines) !== self::NUMBER_OF_MACHINES) {
@@ -236,6 +245,7 @@ class Eli extends MultiM
     }
 
 }
+
 
 class EnemySoldier extends Machine
 {
