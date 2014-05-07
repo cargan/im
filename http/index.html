@@ -15,6 +15,32 @@ var Colors = [
 ];
 
 var graph = new Springy.Graph();
+$.get('/data/map.json', function(result) {
+    var nodes = {};
+    result.nodes.forEach(function(val, key) {
+        nodes[val] = graph.newNode({label: val});
+    });
+
+    result.edges.forEach(function(val, key) {
+        graph.newEdge(
+            nodes[val.from],
+            nodes[val.to],
+            {
+                color: Colors[key],
+                label: val.weight
+            }
+        );
+    });
+
+  var springy = window.springy = jQuery('#machines').springy({
+    graph: graph,
+    nodeSelected: function(node){
+      console.log('Node selected: ' + JSON.stringify(node.data));
+    }
+  });
+
+}, 'json');
+/*
 
 var Gargzdai = graph.newNode({
     label: 'Gargzdai',
@@ -41,7 +67,9 @@ graph.newEdge(Maciuiciai, Kvietiniai, {color: Colors[8]});
       console.log('Node selected: ' + JSON.stringify(node.data));
     }
   });
+  */
 });
+
 </script>
 
 <div class="controls">
