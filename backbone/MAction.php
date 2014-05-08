@@ -1,8 +1,8 @@
 <?php
 require("M.php");
-//
+
 // $MAP = [
-//     'nodes' => ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'e', 'j', 'i'],
+//     'nodes' => ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'i'],
 //     'edges' => [
 //         ['from' => 'a', 'to' => 'b', 'weight' => 4],
 //         ['from' => 'a', 'to' => 'd', 'weight' => 1],
@@ -38,15 +38,22 @@ require("M.php");
 //         ['from' => 'j', 'to' => 'f', 'weight' => 8],
 //     ]
 // ];
-// //file_put_contents('map.json', json_encode($MAP));
+// file_put_contents('map.json', json_encode($MAP));
+// exit;
 //
 // $MACHINES = [
 //     ['location' => 'c', 'machine' => 'Kali'],
 //     ['location' => 'j', 'machine' => 'Eli'],
-//     // ['location' => 'f', 'machine' => 'EnemySoldier'],
+//     ['location' => 'c', 'machine' => 'Machine'],
+//     ['location' => 'b', 'machine' => 'Machine'],
+//     ['location' => 'b', 'machine' => 'Machine'],
+//     ['location' => 'b', 'machine' => 'Machine'],
+//     ['location' => 'b', 'machine' => 'Machine'],
+//     ['location' => 'b', 'machine' => 'Kali'],
 // ];
 //
 // file_put_contents('machines.json', json_encode($MACHINES));
+// exit;
 //
 //
 // $OTHERS = [

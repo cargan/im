@@ -3,73 +3,103 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 <script>
 jQuery(function(){
-var Colors = [
-    '#00A0B0',
-    '#6A4A3C',
-    '#CC333F',
-    '#EB6841',
-    '#EDC951',
-    '#7DBE3C',
-    '#BE7D3C',
-    '#6A4A3C'
-];
+    var graph = new Springy.Graph();
+    $.get('/data/map.json', function(result) {
+        var nodes = {};
+        result.nodes.forEach(function(val, key) {
+            nodes[val] = graph.newNode({label: val});
+        });
 
-var graph = new Springy.Graph();
-$.get('/data/map.json', function(result) {
-    var nodes = {};
-    result.nodes.forEach(function(val, key) {
-        nodes[val] = graph.newNode({label: val});
-    });
+        result.edges.forEach(function(val, key) {
+            graph.newEdge(
+                nodes[val.from],
+                nodes[val.to],
+                {
+                    color: Colors[key],
+                    label: val.weight
+                }
+            );
+        });
 
-    result.edges.forEach(function(val, key) {
-        graph.newEdge(
-            nodes[val.from],
-            nodes[val.to],
-            {
-                color: Colors[key],
-                label: val.weight
+      var springy = window.springy = jQuery('#machines').springy({
+        graph: graph,
+        nodeSelected: function(node){
+          console.log('Node selected: ' + JSON.stringify(node.data));
+        }
+      });
+
+        machinesSummary(result.nodes);
+
+    }, 'json');
+
+    var machinesSummary = function (nodes) {
+        $.get('/data/machines.json', function(result) {
+            var ms = {};
+            result.forEach(function(val, key) {
+                if (ms[val.location] == undefined) {
+                    ms[val.location] = {};
+                }
+                if (ms[val.location][val.machine] == undefined) {
+                    ms[val.location][val.machine] = {
+                        name: val.machine,
+                        value: 0
+                    };
+                }
+                ms[val.location][val.machine]['value']++;
+            });
+            for (m in ms) {
+                var MAC = [];
+                for (ma in ms[m]) {
+                    MAC.push({
+                        name: ms[m][ma].name,
+                        value: ms[m][ma].value
+                    });
+                }
+
+                ms[m]['machines'] = MAC;
             }
-        );
-    });
+            var machines = [];
+            nodes.forEach(function(val, key) {
+                var items = ms[val] ? ms[val]['machines'] : [];
+                machines.push({
+                    node: val,
+                    machines: items
+                });
+            });
 
-  var springy = window.springy = jQuery('#machines').springy({
-    graph: graph,
-    nodeSelected: function(node){
-      console.log('Node selected: ' + JSON.stringify(node.data));
+            var template = $('#Mtemplate').html();
+            Mustache.parse(template);
+            var rendered = Mustache.render(template, {
+                machines: machines
+            });
+
+          $('td#terrainObjects').html(rendered);
+
+        }, 'json');
     }
-  });
 
-}, 'json');
-/*
-
-var Gargzdai = graph.newNode({
-    label: 'Gargzdai',
-    ondoubleclick: function() { console.log("Hello Gargzdai!"); }
-});
-var Vezaiciai = graph.newNode({label: 'Vezaiciai'});
-var Ezaiciai = graph.newNode({label: 'Ezaiciai'});
-var Maciuiciai = graph.newNode({label: 'Maciuiciai'});
-var Kvietiniai = graph.newNode({label: 'Kvietiniai'});
-
-graph.newEdge(Gargzdai, Vezaiciai, {color: Colors[0], label: '5Km'});
-graph.newEdge(Gargzdai, Ezaiciai, {color: Colors[1]});
-graph.newEdge(Gargzdai, Kvietiniai, {color: Colors[2]});
-graph.newEdge(Gargzdai, Maciuiciai, {color: Colors[3]});
-graph.newEdge(Vezaiciai, Gargzdai, {color: Colors[4]});
-graph.newEdge(Maciuiciai, Gargzdai, {color: Colors[5]});
-graph.newEdge(Vezaiciai, Maciuiciai, {color: Colors[6]});
-graph.newEdge(Vezaiciai, Ezaiciai, {color: Colors[7]});
-graph.newEdge(Maciuiciai, Kvietiniai, {color: Colors[8]});
-
-  var springy = window.springy = jQuery('#machines').springy({
-    graph: graph,
-    nodeSelected: function(node){
-      console.log('Node selected: ' + JSON.stringify(node.data));
-    }
-  });
-  */
 });
 
+</script>
+
+<script id="Mtemplate" type="x-tmpl-mustache">
+<table>
+    <tr>
+        <th>Position</th>
+        <th>Objects</th>
+    </tr>
+    {{#machines}}
+    <tr>
+        <td>{{node}}</td>
+        <td>
+            {{#machines}}
+            {{ name }} : {{ value }}
+            {{/machines}}
+            {{^machines}}-{{/machines}}
+        </td>
+    </tr>
+    {{/machines}}
+</table>
 </script>
 
 <div class="controls">
@@ -91,10 +121,17 @@ graph.newEdge(Maciuiciai, Kvietiniai, {color: Colors[8]});
     </form>
 </div>
 
-<canvas id="machines" width="1600" height="700" />
+<table width="100%" id="wrap">
+    <tr>
+        <td><canvas id="machines" width="1300" height="700" /></td>
+        <td id="terrainObjects"></td>
+    </tr>
+</table>
 
 <script src="/static/springy.js"></script>
 <script src="/static/springyui.js"></script>
+<script src="/static/colors.js"></script>
+<script src="/static/mustache.js"></script>
 
 </body>
 </html>
