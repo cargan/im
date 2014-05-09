@@ -2,35 +2,40 @@
 <body>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 <script>
+var API = '/api.php';
 jQuery(function(){
-    var graph = new Springy.Graph();
-    $.get('/data/map.json', function(result) {
-        var nodes = {};
-        result.nodes.forEach(function(val, key) {
-            nodes[val] = graph.newNode({label: val});
-        });
+    var drawMap = function(graph) {
+        var data = {
+            a: getNodes
+        };
+        $.get(API, data, function(result) {
+            var nodes = {};
+            result.nodes.forEach(function(val, key) {
+                nodes[val] = graph.newNode({label: val});
+            });
 
-        result.edges.forEach(function(val, key) {
-            graph.newEdge(
-                nodes[val.from],
-                nodes[val.to],
-                {
-                    color: Colors[key],
-                    label: val.weight
-                }
-            );
-        });
+            result.edges.forEach(function(val, key) {
+                graph.newEdge(
+                    nodes[val.from],
+                    nodes[val.to],
+                    {
+                        color: Colors[key],
+                        label: val.weight
+                    }
+                );
+            });
 
-      var springy = window.springy = jQuery('#machines').springy({
-        graph: graph,
-        nodeSelected: function(node){
-          console.log('Node selected: ' + JSON.stringify(node.data));
-        }
-      });
+          var springy = window.springy = jQuery('#machines').springy({
+            graph: graph,
+            nodeSelected: function(node){
+              console.log('Node selected: ' + JSON.stringify(node.data));
+            }
+          });
 
-        machinesSummary(result.nodes);
+            machinesSummary(result.nodes);
 
-    }, 'json');
+        }, 'json');
+    }
 
     var machinesSummary = function (nodes) {
         $.get('/data/machines.json', function(result) {
@@ -77,6 +82,11 @@ jQuery(function(){
 
         }, 'json');
     }
+
+
+    var graph = new Springy.Graph();
+    
+    drawMap(graph);
 
 });
 
