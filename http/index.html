@@ -4,20 +4,27 @@
 <script>
 var API = '/api.php';
 jQuery(function(){
+
+    $('form#manipulateMachines').submit(function() {
+        console.log('qq');
+        return false;
+    })
+
     var drawMap = function(graph) {
         var data = {
-            a: getNodes
+            a: 'getNodesAndEdges'
         };
-        $.get(API, data, function(result) {
+
+        $.get(API, data, function(response) {
             var nodes = {};
-            result.nodes.forEach(function(val, key) {
-                nodes[val] = graph.newNode({label: val});
+            response.result.nodes.forEach(function(val, key) {
+                nodes[val.node] = graph.newNode({label: val.node});
             });
 
-            result.edges.forEach(function(val, key) {
+            response.result.edges.forEach(function(val, key) {
                 graph.newEdge(
-                    nodes[val.from],
-                    nodes[val.to],
+                    nodes[val.nfrom],
+                    nodes[val.nto],
                     {
                         color: Colors[key],
                         label: val.weight
@@ -32,26 +39,31 @@ jQuery(function(){
             }
           });
 
-            machinesSummary(result.nodes);
+            machinesSummary(response.result.nodes);
 
         }, 'json');
-    }
+    };
 
     var machinesSummary = function (nodes) {
-        $.get('/data/machines.json', function(result) {
+        var data = {
+            a: 'getMachines'
+        };
+
+        $.get(API, data, function(response) {
             var ms = {};
-            result.forEach(function(val, key) {
-                if (ms[val.location] == undefined) {
-                    ms[val.location] = {};
+            response.result.forEach(function(val, key) {
+                if (ms[val.node] == undefined) {
+                    ms[val.node] = {};
                 }
-                if (ms[val.location][val.machine] == undefined) {
-                    ms[val.location][val.machine] = {
-                        name: val.machine,
+                if (ms[val.node][val.machine] == undefined) {
+                    ms[val.node][val.machine] = {
+                        name: val.name,
                         value: 0
                     };
                 }
-                ms[val.location][val.machine]['value']++;
+                ms[val.node][val.machine]['value']++;
             });
+
             for (m in ms) {
                 var MAC = [];
                 for (ma in ms[m]) {
@@ -65,9 +77,9 @@ jQuery(function(){
             }
             var machines = [];
             nodes.forEach(function(val, key) {
-                var items = ms[val] ? ms[val]['machines'] : [];
+                var items = ms[val.node] ? ms[val.node]['machines'] : [];
                 machines.push({
-                    node: val,
+                    node: val.node,
                     machines: items
                 });
             });
@@ -85,7 +97,7 @@ jQuery(function(){
 
 
     var graph = new Springy.Graph();
-    
+
     drawMap(graph);
 
 });
@@ -113,13 +125,7 @@ jQuery(function(){
 </script>
 
 <div class="controls">
-    <form>
-        <div>
-            <button id="addMachine">Add Machine</button>
-            <button id="addKali">Add Kali</button>
-            <button id="addEli">Add Eli</button>
-            <button id="addEnemy">Add Enemy</button>
-        </div>
+    <form id="manipulateMachines">
         <div>
             <label for="Location">Location</label>
             <input type="text" name="Location" value="" id="Location">
@@ -127,6 +133,15 @@ jQuery(function(){
             <label for="count">Count</label>
             <input type="text" name="count" value="" id="count">
 
+            <select id="addMachine">
+                <option></option>
+                <option val="machine">Machine</option>
+                <option val="kali">Kali</option>
+                <option val="eli">Eli</option>
+                <option val="enemy">Enemy</option>
+            </select>
+
+            <button>Add</button>
         </div>
     </form>
 </div>

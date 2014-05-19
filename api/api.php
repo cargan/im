@@ -12,6 +12,8 @@ $actions = [
     'moveMachine',
     'getEdges',
     'getNodes',
+    'getNodesAndEdges',
+    'getMachines',
 ];
 
 // var_dump($_GET['a']);exit;
