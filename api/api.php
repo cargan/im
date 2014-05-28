@@ -7,21 +7,31 @@ require($dir.'db.php');
 require($dir.'ApiManager.php');
 
 $actions = [
-    'addMachine',
-    'removeMachine',
-    'moveMachine',
-    'getEdges',
-    'getNodes',
-    'getNodesAndEdges',
-    'getMachines',
+    'post' => [
+        'addMachine',
+    ],
+    'get' => [
+        'removeMachine',
+        'moveMachine',
+        'getEdges',
+        'getNodes',
+        'getNodesAndEdges',
+        'getMachines'
+    ]
 ];
 
-// var_dump($_GET['a']);exit;
-// print_r(moveMachine(1, 'h', $dbh));
-
-$action = !empty($_GET['a']) ? $_GET['a'] : null;
-$params = !empty($_GET['p']) ? $_GET['p'] : null;
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $actions = $actions['post'];
+    $action = !empty($_POST['a']) ? $_POST['a'] : null;
+    unset($_POST['a']);
+    $params = $_POST;
+} else {
+    $actions = $actions['get'];
+    $action = !empty($_GET['a']) ? $_GET['a'] : null;
+    $params = !empty($_GET['p']) ? $_GET['p'] : null;
+}
+// print_r($action);
+// print_r($params);exit;
 if (!in_array($action, $actions)) {
     header( "HTTP/1.0 400 Bad Request");
     die('unknown action');

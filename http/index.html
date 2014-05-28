@@ -3,12 +3,30 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 <script>
 var API = '/api.php';
+var MACHINES = [];
 jQuery(function(){
 
     $('form#manipulateMachines').submit(function() {
-        console.log('qq');
+        var data = {};
+        data.location = $(this).find('#Location').val();
+        data.count = $(this).find('#count').val();
+        data.machine = $(this).find('#addMachine').val();
+        addMachine(data);
         return false;
     })
+
+    var addMachine = function(data) {
+        var postData = {
+            a: 'addMachine',
+            location: data.location,
+            count: data.count,
+            machine: data.machine
+        };
+
+        $.post(API, postData, function(result) {
+            console.log(result);
+        });
+    };
 
     var drawMap = function(graph) {
         var data = {
@@ -50,6 +68,7 @@ jQuery(function(){
         };
 
         $.get(API, data, function(response) {
+            MACHINES = response.result;
             var ms = {};
             response.result.forEach(function(val, key) {
                 if (ms[val.node] == undefined) {
@@ -97,9 +116,7 @@ jQuery(function(){
 
 
     var graph = new Springy.Graph();
-
     drawMap(graph);
-
 });
 
 </script>
@@ -135,10 +152,10 @@ jQuery(function(){
 
             <select id="addMachine">
                 <option></option>
-                <option val="machine">Machine</option>
-                <option val="kali">Kali</option>
-                <option val="eli">Eli</option>
-                <option val="enemy">Enemy</option>
+                <option value="3">Machine</option>
+                <option value="1">Kali</option>
+                <option value="2">Eli</option>
+                <option value="4">Enemy</option>
             </select>
 
             <button>Add</button>

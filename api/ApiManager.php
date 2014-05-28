@@ -39,19 +39,26 @@ class ApiManager
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    private function getMachines($dbh)
+    private function getMachines()
     {
         $stmt = $this->__getDbh()->query("SELECT m.*, mt.* FROM `machines` " .
             "m INNER JOIN `machine_types` mt ON mt.id = m.machine_type");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    private function addMachine($type, $node, $dbh)
+    private function addMachine($params)
     {
         $sql = "INSERT INTO `im`.`machines` (`id`, `machine_type`, `node`) VALUES (NULL, :type, :node)";
+        // $stmt = $this->__getDbh()->query($sql);
         $query = $this->__getDbh()->prepare($sql);
-        return $query->execute(array(':type'=> $type,
-                        ':node'=>$node));
+        while($params['count']--) {
+            $re = $query->execute(array(':type'=> $params['machine'],
+                        ':node'=>$params['location']));
+            if (!$re) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private function removeMachine($id, $dbh)
