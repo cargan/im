@@ -58,6 +58,7 @@ jQuery(function(){
           });
 
             machinesSummary(response.result.nodes);
+            enemiesSummary(response.result.nodes);
 
         }, 'json');
     };
@@ -67,40 +68,30 @@ jQuery(function(){
             a: 'getMachines'
         };
 
-        $.get(API, data, function(response) {
-            MACHINES = response.result;
-            var ms = {};
+        $.post(API, data, function(response) {
+            var MACHINES = response.result;
+            var mach = {};
             response.result.forEach(function(val, key) {
-                if (ms[val.node] == undefined) {
-                    ms[val.node] = {};
+                if (typeof mach[val.node] === "undefined") {
+                    mach[val.node] =[];
                 }
-                if (ms[val.node][val.machine] == undefined) {
-                    ms[val.node][val.machine] = {
-                        name: val.name,
-                        value: 0
-                    };
-                }
-                ms[val.node][val.machine]['value']++;
+                mach[val.node].push({
+                    name: val.name,
+                    value: val.mcount
+                });
             });
 
-            for (m in ms) {
-                var MAC = [];
-                for (ma in ms[m]) {
-                    MAC.push({
-                        name: ms[m][ma].name,
-                        value: ms[m][ma].value
-                    });
-                }
-
-                ms[m]['machines'] = MAC;
-            }
             var machines = [];
             nodes.forEach(function(val, key) {
-                var items = ms[val.node] ? ms[val.node]['machines'] : [];
+                var M = [];
+                if (typeof mach[val.node] !== "undefined") {
+                    M = mach[val.node];
+                }
                 machines.push({
                     node: val.node,
-                    machines: items
+                    machines: M
                 });
+
             });
 
             var template = $('#Mtemplate').html();
@@ -109,7 +100,52 @@ jQuery(function(){
                 machines: machines
             });
 
-          $('td#terrainObjects').html(rendered);
+          $('td#terrainObjectsMachines').html(rendered);
+
+        }, 'json');
+    }
+
+
+    var enemiesSummary = function (nodes) {
+        var data = {
+            a: 'getEnemies'
+        };
+
+        $.post(API, data, function(response) {
+            var MACHINES = response.result;
+            var mach = {};
+            response.result.forEach(function(val, key) {
+                if (typeof mach[val.node] === "undefined") {
+                    mach[val.node] =[];
+                }
+                mach[val.node].push({
+                    name: val.name,
+                    value: val.mcount
+                });
+            });
+
+            var machines = [];
+            nodes.forEach(function(val, key) {
+                var M = [];
+                if (typeof mach[val.node] !== "undefined") {
+                    M = mach[val.node];
+                }
+                machines.push({
+                    node: val.node,
+                    machines: M
+                });
+
+            });
+
+
+
+            var template = $('#Mtemplate').html();
+            Mustache.parse(template);
+            var rendered = Mustache.render(template, {
+                machines: enemies
+            });
+
+          $('td#terrainObjectsEnemies').html(rendered);
 
         }, 'json');
     }
@@ -166,7 +202,8 @@ jQuery(function(){
 <table width="100%" id="wrap">
     <tr>
         <td><canvas id="machines" width="1300" height="700" /></td>
-        <td id="terrainObjects"></td>
+        <td id="terrainObjectsMachines"></td>
+        <td id="terrainObjectsEnemies"></td>
     </tr>
 </table>
 
