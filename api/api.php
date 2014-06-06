@@ -9,6 +9,8 @@ require($dir.'ApiManager.php');
 $actions = [
     'post' => [
         'addMachine',
+        'getEnemies',
+        'getMachines',
     ],
     'get' => [
         'removeMachine',
@@ -16,7 +18,6 @@ $actions = [
         'getEdges',
         'getNodes',
         'getNodesAndEdges',
-        'getMachines'
     ]
 ];
 

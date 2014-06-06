@@ -39,10 +39,17 @@ class ApiManager
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    private function getEnemies()
+    {
+        $stmt = $this->__getDbh()->query("SELECT e.node, et.name, count(e.enemy_type) as mcount FROM `enemies` e INNER JOIN `enemy_types` et ON et.id = e.enemy_type GROUP BY e.node, e.enemy_type ORDER BY e.node");
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     private function getMachines()
     {
-        $stmt = $this->__getDbh()->query("SELECT m.*, mt.* FROM `machines` " .
-            "m INNER JOIN `machine_types` mt ON mt.id = m.machine_type");
+        $stmt = $this->__getDbh()->query("SELECT m.node, mt.name, count(m.machine_type) as mcount FROM `machines` m INNER JOIN `machine_types` mt ON mt.id = m.machine_type GROUP BY m.node, m.machine_type ORDER BY m.node");
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
